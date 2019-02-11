@@ -1,4 +1,6 @@
 import React from "react";
+import { Alert } from "react-native";
+import { Notifications } from "expo";
 import {
   createBottomTabNavigator,
   createStackNavigator,
@@ -6,6 +8,7 @@ import {
 } from "react-navigation";
 import { Provider } from "react-redux";
 import { Icon } from "react-native-elements";
+import registerForNotifications from "./services/push_notifications";
 import store from "./store";
 import AuthScreen from "./screens/AuthScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
@@ -15,6 +18,20 @@ import SettingScreen from "./screens/SettingScreen";
 import ReviewScreen from "./screens/ReviewScreen";
 
 class App extends React.Component {
+  componentDidMount() {
+    registerForNotifications();
+    //to listen for upcoming notifications
+    Notifications.addListener(notification => {
+      const {
+        data: { text },
+        origin
+      } = notification; //text = notification.data.text
+      if (origin === "received" && text) {
+        Alert.alert("New Push Notification", text, [{ text: "OK" }]);
+      }
+    });
+  }
+
   render() {
     const MainNavigator = createBottomTabNavigator({
       welcome: {
