@@ -5,6 +5,7 @@ import {
   createAppContainer
 } from "react-navigation";
 import { Provider } from "react-redux";
+import { Icon } from "react-native-elements";
 import store from "./store";
 import AuthScreen from "./screens/AuthScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
@@ -24,16 +25,34 @@ class App extends React.Component {
       },
       auth: { screen: AuthScreen },
       main: {
-        screen: createBottomTabNavigator({
-          deck: { screen: DeckScreen },
-          map: { screen: MapScreen },
-          review: {
-            screen: createStackNavigator({
-              review: { screen: ReviewScreen },
-              setting: { screen: SettingScreen }
-            })
+        navigationOptions: {
+          tabBarVisible: false
+        },
+        screen: createBottomTabNavigator(
+          {
+            deck: { screen: DeckScreen },
+            map: {
+              screen: MapScreen
+            },
+            review: {
+              screen: createStackNavigator({
+                review: { screen: ReviewScreen },
+                setting: { screen: SettingScreen }
+              }),
+              navigationOptions: () => ({
+                title: `Review Jobs`,
+                tabBarIcon: ({ tintColor }) => {
+                  return <Icon name="favorite" size={30} color={tintColor} />;
+                }
+              })
+            }
           }
-        })
+          // {
+          //   tabBarOptions: {
+          //     labelStyle: { fontSize: 12 }
+          //   }
+          // }
+        )
       }
     });
 

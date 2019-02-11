@@ -1,31 +1,94 @@
 import React, { Component } from "react";
-import { Text, View, Button, Platform } from "react-native";
+import { Text, ScrollView, Button, Platform, Linking } from "react-native";
+import { Card, Icon } from "react-native-elements";
+import { MapView } from "expo";
+import { connect } from "react-redux";
 
 class ReviewScreen extends Component {
-  static navigationOptions = ({ navigation }) => {
-    return {
-      headerTitle: "Review Jobs",
-      headerRight: (
-        <Button
-          title="Go Right"
-          onPress={() => navigation.navigate("setting")}
-        />
-      )
-      // headerStyle: { marginTop: Platform.OS === "android" ? 20 : 0 }
-    };
+  static navigationOptions = {
+    title: "Review Jobs",
+    titleBarIcon: ({ tintColor }) => {
+      return <Icon name="description" size={30} color={tintColor} />;
+    },
+    header: ({ navigate }) => {
+      return {
+        right: (
+          <Button
+            title="Settings"
+            onPress={() => navigate("settings")}
+            backgroundColor="rgba(0,0,0,0)"
+            color="rgba(0, 122, 255, 1)"
+          />
+        ),
+        style: {
+          marginTop: Platform.OS === "android" ? 24 : 0
+        }
+      };
+    }
   };
 
+  renderLikedJobs() {
+    return this.props.likedJobs.map(job => {
+      const {
+        company,
+        formattedRelativeTime,
+        url,
+        longitude,
+        latitude,
+        jobtitle,
+        jobkey
+      } = job;
+
+      const initialRegion = {
+        longitude,
+        latitude,
+        latitudeDelta: 0.045,
+        longitudeDelta: 0.02
+      };
+
+      return (
+        <Card title={jobtitle} key={jobkey}>
+          <View style={{ height: 200 }}>
+            <MapView
+              style={{ flex: 1 }}
+              cacheEnabled={Platform.OS === "android"}
+              scrollEnabled={false}
+              initialRegion={initialRegion}
+            />
+            <View style={styles.detailWrapper}>
+              <Text style={styles.italics}>{company}</Text>
+              <Text style={styles.italics}>{formattedRelativeTime}</Text>
+            </View>
+            <Button
+              title="Apply Now!"
+              backgroundColor="#03A9F4"
+              onPress={() => Linking.openURL(url)}
+            />
+          </View>
+        </Card>
+      );
+    });
+  }
+
   render() {
-    return (
-      <View>
-        <Text> ReviewScreen </Text>
-        <Text> ReviewScreen </Text>
-        <Text> ReviewScreen </Text>
-        <Text> ReviewScreen </Text>
-        <Text> ReviewScreen </Text>
-      </View>
-    );
+    return <ScrollView>{this.renderLikedJobs()}</ScrollView>;
   }
 }
 
-export default ReviewScreen;
+const styles = {
+  italics: {
+    fontStyle: "italic"
+  },
+  detailWrapper: {
+    marginTop: 10,
+    margintBottom: 10,
+    flexDirection: "row",
+    justfiyContent: "space-around"
+  }
+};
+
+const mapStateToProps = state => {
+  return { likedJobs: state.likedJobs };
+};
+
+export default connect(mapStateToProps)(ReviewScreen);
